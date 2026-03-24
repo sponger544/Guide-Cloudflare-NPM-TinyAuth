@@ -1,0 +1,22 @@
+  tinyauth:
+    container_name: tinyauth
+    image: ghcr.io/steveiliop56/tinyauth:v5
+    restart: unless-stopped
+    environment:
+      - TINYAUTH_APPURL=http://tinyauth.example.com
+      - TINYAUTH_AUTH_USERS=user:$$2a$$10$$UdLYoJ5lgPsC0RKqYH/jMua7zIn0g9kPqWmhYayJYLaZQ/FTmH2/u # user:password
+      - TINYAUTH_DATABASE_PATH=/config/tinyauth.db # We are going to bind mount the tinyauth DB to the config folder
+      - TINYAUTH_UI_BACKGROUNDIMAGE=/resources/background.jpg # Background Images need to be included in the TinyAuth Resources folder, otherwise they will not be pulled.
+    volumes:
+      - ./tinyauth:/config
+      - ./tinyauth:/data/resources/background.jpg # Required for background images
+    ports:
+      - '3000:3000' # Tinyauth Port
+    networks:
+      - tunnel-net
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider 172.20.0.1:3001 || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
