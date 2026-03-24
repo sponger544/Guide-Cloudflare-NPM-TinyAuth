@@ -1,0 +1,8 @@
+  NGINX:
+    container_name: NGINX
+    network_mode: container:cloudflared # Ensures public traffic is routed through cloudflared. Port publishing is handled by cloudflare.
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
