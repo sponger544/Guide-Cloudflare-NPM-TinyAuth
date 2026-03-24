@@ -372,5 +372,5 @@ location @tinyauth_login {
 
 To add this, go into the `Proxy Host` and select the `Gear` Icon on the top right. Paste this into the `Custom Nginx Configuration` box. The only thing you need to change is the `return 302` to the correct Tinyauth website.
 
-And we should be good to go! All we have to do is create a new service and include the Custom Nginx Configuration and our services will be up and protected by Tinyauth!
+And we should be good to go! All we have to do is create a new service and include the Custom Nginx Configuration and our services will be up and protected by Tinyauth. And ensure that the service port is not blocked by your firewall!
 
