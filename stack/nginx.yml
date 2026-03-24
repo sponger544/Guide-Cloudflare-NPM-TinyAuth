@@ -1,7 +1,7 @@
 services:
   NGINX:
     container_name: NGINX
-    network_mode: service:cloudflared # Ensures public traffic is routed through cloudflared. Port publishing is handled by cloudflare.
+    network_mode: container:cloudflared # Ensures public traffic is routed through cloudflared. Port publishing is handled by cloudflare.
     depends_on:
      - cloudflared # Ensures that cloudflared is brought up before the NGINX Proxy Manager
     image: 'docker.io/jc21/nginx-proxy-manager:latest'
