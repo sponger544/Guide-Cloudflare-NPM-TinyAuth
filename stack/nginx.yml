@@ -1,3 +1,4 @@
+services:
   NGINX:
     container_name: NGINX
     network_mode: service:cloudflared # Ensures public traffic is routed through cloudflared. Port publishing is handled by cloudflare.
