@@ -1,0 +1,13 @@
+include:
+  - path: ./cloudflared.yml
+  - path: ./nginx.yml
+  - path: ./tinyauth.yml
+# Network Start
+networks:
+  tunnel-net:
+    name: tunnel-net
+    external: false
+      driver: bridge
+      config:
+        - subnet: 172.20.0.0/16 # Can be set to your preferred IP address.
+# Network End
