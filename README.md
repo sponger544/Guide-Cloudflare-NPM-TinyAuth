@@ -1,6 +1,8 @@
-This is a guide on how to configure NGINX through a Cloudflared/Argo tunnel, along with TinyAuth. This guide assumes you already have your own domain and docker installed, but will walk you through the steps for everything else.
+This guide will walk you through tunneling NGINX through a Cloudflared tunnel. We will also be configuring TinyAuth as our authentication source for all of our services. This guide assumes you already have your own domain and docker installed, and will walk you through the rest of the process.
 
-We will also be combining everything into one compose.yml file, but you are able to separate them by adding them into their own compose.yml by creating an additional compose.yml that includes them. We can also add network creation into this yml file. E.G.:
+A reason you may want to do this is you don't want to or are unable to forward ports 80/443. Maybe you are behind a CGNAT and don't have a static IP. Or even maybe you don't want to deal with exposing your public IP. In my case I was unable to forward my ports and this was the easiest way to ensure my services are hosted locally without dealing with VPS port forwarding or another additional layer to manage.
+
+This guide combines everything into one compose.yml file, but you are able to separate them by adding them into their own compose.yml. You can do this by creating an additional `compose.yml` that includes the other `.yml`. files. We can also add network creation into this. E.G.
 
 ```yaml
 include:
@@ -21,7 +23,7 @@ networks:
 # Cloudflared Tunnel configuration:
 ---
 
-1. Create a cloudflared tunnel
+1. First, we need to create a route to proxy traffic.
     1. In the `Zero Trust` menu, navigate to Networks > Connectors
     2. Select `Create a tunnel`
     3. Select `Select Cloudflared`
