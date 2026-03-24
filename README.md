@@ -22,24 +22,26 @@ networks:
 ---
 
 1. Create a cloudflared tunnel
-  1. In the `Zero Trust` menu, navigate to Networks > Connectors
-  2. Select `Create a tunnel`
-  3. Select `Select Cloudflared`
-    1. Name does not matter. Select Save tunnel.
-    2. Under install and run a connector, set the device operating system to `Docker`
-    3. Copy the code and convert it to a [compose.yml](https://www.composerize.com)
-    4. Select Next and then create your first application route.
-  4. Create application routes for HTTP and HTTPS
-    1. Set subdomain as *
-    2. Select the correct domain from the drop down
-    3. Set Service Type as HTTP
-    4. Set the URL as localhost:80
+    1. In the `Zero Trust` menu, navigate to Networks > Connectors
+    2. Select `Create a tunnel`
+    3. Select `Select Cloudflared`
+        1. Name does not matter. Select Save tunnel.
+        2. Under install and run a connector, set the device operating system to `Docker`
+        3. Copy the code and convert it to a [compose.yml](https://www.composerize.com)
+        4. Select Next and then create your first application route.
+    4. Create application routes for HTTP and HTTPS
+        1. Set subdomain as *
+        2. Select the correct domain from the drop down
+        3. Set Service Type as HTTP
+        4. Set the URL as localhost:80
     5. Select complete setup
-  5. Select the newly create tunnel
-  6. Select `Published Application Routes`
-  7. Create a new hostname the same as previously, except set the url to localhost:443
-  8. We are done with the cloudflared website. We will be making a running compose file from here on, but feel free to bring it up and test it. When you perform `docker compose up` you should see the tunnel show healthy in the cloudflare dashboard.
-  9. Your compose.yml file should look like the following:
+    5. Select the newly create tunnel
+    6. Select `Published Application Routes`
+    7. Create a new hostname the same as previously, except set the url to localhost:443
+
+We are done with the cloudflared website. We will be making a running compose file from here on, but feel free to bring it up and test it. When you perform `docker compose up` you should see the tunnel show healthy in the cloudflare dashboard.
+
+Your compose.yml file should look like the following:
   
 ```yaml
 services:
@@ -48,7 +50,8 @@ services:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run
     environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}    
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped    
 ```
   10. Create a `.env` file in the same root location as the compose.yml by using `sudo nano .env` in a CLI
   
@@ -59,7 +62,7 @@ CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token
 # NPM Configuration:
 ---
 
-We are now going to add NGINX Proxy Manager onto the previously create compose file. This is the example compose file from the [NPM GITHUB}(https://github.com/NginxProxyManager/nginx-proxy-manager)]
+We are now going to add NGINX Proxy Manager onto the previously create compose file. This is the example compose file from the [NPM GITHUB](https://github.com/NginxProxyManager/nginx-proxy-manager)
 
 ```yaml
 services:
@@ -87,6 +90,7 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
 # Cloudflare End
 # NPM Start
   NGINX:
@@ -114,6 +118,7 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
     ports:
       - '80:80' # HTTP Port
       - '81:81' # NPM Admin
@@ -164,6 +169,7 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
     ports:
       - '80:80' # HTTP Port
       - '81:81' # NPM Admin
@@ -261,6 +267,7 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
       - TUNNEL_METRICS=127.0.0.1:60123 # Needed for healthchecks.
+    restart: unless-stopped
     ports:
       - '80:80' # HTTP Port
       - '81:81' # NPM Admin
