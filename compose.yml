@@ -1,0 +1,73 @@
+# Cloudflared Start
+services:
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+      - TUNNEL_METRICS=127.0.0.1:60123 # Needed for healthchecks.
+    restart: unless-stopped
+    ports:
+      - '80:80' # HTTP Port
+      - '81:81' # NPM Admin
+      - '443:443' # HTTPS Port
+    networks:
+      - tunnel-net
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "--metrics", "localhost:60123", "ready"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+# Cloudflared End
+# NPM Start
+  NGINX:
+    container_name: NGINX
+    network_mode: service:cloudflared # Ensures public traffic is routed through cloudflared. Port publishing is handled by cloudflare.
+    depends_on:
+     - cloudflared # Ensures that cloudflared is brought up before the NGINX Proxy Manager
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://172.20.0.1:81"] 
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+# NPM End
+# Tinyauth Start
+  tinyauth:
+    container_name: tinyauth
+    image: ghcr.io/steveiliop56/tinyauth:v5
+    restart: unless-stopped
+    environment:
+      - TINYAUTH_APPURL=http://tinyauth.example.com
+      - TINYAUTH_AUTH_USERS=user:$$2a$$10$$UdLYoJ5lgPsC0RKqYH/jMua7zIn0g9kPqWmhYayJYLaZQ/FTmH2/u # user:password
+      - TINYAUTH_DATABASE_PATH=/config/tinyauth.db # We are going to bind mount the tinyauth DB to the config folder
+      - TINYAUTH_UI_BACKGROUNDIMAGE=/resources/background.jpg # Background Images need to be included in the TinyAuth Resources folder, otherwise they will not be pulled.
+    volumes:
+      - ./tinyauth:/config
+      - ./tinyauth:/data/resources/background.jpg # Required for background images
+    ports:
+      - '3000:3000' # Tinyauth Port
+    networks:
+      - tunnel-net
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider 172.20.0.1:3001 || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+# Tinyauth End
+# Network Start
+networks:
+  tunnel-net:
+    name: tunnel-net
+    external: false
+      driver: bridge
+      config:
+        - subnet: 172.20.0.0/16 # Can be set to your preferred IP address.
+# Network End
