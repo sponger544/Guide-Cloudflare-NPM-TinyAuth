@@ -5,4 +5,16 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    restart: unless-stopped    
+      - TUNNEL_METRICS=127.0.0.1:60123 # Needed for healthchecks.
+    restart: unless-stopped
+    ports:
+      - '80:80' # HTTP Port
+      - '81:81' # NPM Admin
+      - '443:443' # HTTPS Port
+    networks:
+      - tunnel-net
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "--metrics", "localhost:60123", "ready"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
